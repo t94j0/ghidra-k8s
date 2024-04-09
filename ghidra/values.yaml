@@ -1,0 +1,19 @@
+replicaCount: 1
+
+image:
+  repository: blacktop/ghidra
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: 11.0.2-alpine
+
+resources:
+  limits:
+    cpu: "2"
+    memory: 4Gi
+  requests:
+    cpu: "1"
+    memory: 2Gi
+
+sampleStorage:
+  size: 10Gi
+  # storageClassName: null

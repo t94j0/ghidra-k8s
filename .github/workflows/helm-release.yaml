@@ -35,7 +35,7 @@ jobs:
           PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
         run: |
           mkdir -p $PACKAGE_DIR
-          helm package --version ${GITHUB_REF_NAME} --app-version ${GITHUB_REF_NAME} -d $PACKAGE_DIR .
+          helm package --version ${} --app-version ${GITHUB_REF_NAME} -d $PACKAGE_DIR .
 
       - name: Update Helm repository index.yaml file
         env:
@@ -51,6 +51,7 @@ jobs:
       - name: Create Github release with the Helm charts
         env:
           PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
+          GH_TOKEN: ${{ github.token }}
         run: gh release create v${GITHUB_REF_NAME} -R ${{ github.repository }} -t "Release v${GITHUB_REF_NAME}" -n "Release v${GITHUB_REF_NAME}" $PACKAGE_DIR/*.tgz
 
       - name: Setup Github pages
@@ -72,4 +73,6 @@ jobs:
       - name: Remove Github release and tag on failure
         continue-on-error: true
         if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: gh release delete -R ${{ github.repository }} v${GITHUB_REF_NAME} -y --cleanup-tag

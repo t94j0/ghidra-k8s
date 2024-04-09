@@ -35,7 +35,7 @@ jobs:
           PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
         run: |
           mkdir -p $PACKAGE_DIR
-          helm package --version ${} --app-version ${GITHUB_REF_NAME} -d $PACKAGE_DIR .
+          helm package --version ${GITHUB_REF_NAME} --app-version ${GITHUB_REF_NAME} -d $PACKAGE_DIR .
 
       - name: Update Helm repository index.yaml file
         env:

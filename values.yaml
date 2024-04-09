@@ -3,9 +3,10 @@ replicaCount: 1
 image:
   repository: blacktop/ghidra
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: 11.0.2-alpine
 
+# Used for MAXMEM env var
+memoryRequest: "4G"
 resources:
   limits:
     cpu: "2"
@@ -14,6 +15,19 @@ resources:
     cpu: "1"
     memory: 2Gi
 
+service:
+  ports:
+    - name: ghidra-0
+      port: 13100
+      targetPort: 13100
+    - name: ghidra-1
+      port: 13101
+      targetPort: 13101
+    - name: ghidra-2
+      port: 13102
+      targetPort: 13102
+
 sampleStorage:
   size: 10Gi
   storageClassName: local-path
+  mountPath: /samples

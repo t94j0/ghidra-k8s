@@ -6,7 +6,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  # storageClassName: {{ .Values.sampleStorage.storageClassName }}
+  storageClassName: {{ .Values.sampleStorage.storageClassName }}
   resources:
     requests:
       storage: {{ .Values.sampleStorage.size }}
@@ -35,10 +35,10 @@ spec:
           resources: {{- toYaml .Values.resources | nindent 12 }}
           env:
             - name: MAXMEM
-              value: "4G"
+              value: {{ .Values.memoryRequest }}
           volumeMounts:
             - name: samples
-              mountPath: /samples
+              mountPath: {{ .Values.sampleStorage.mountPath }}
       volumes:
         - name: samples
           persistentVolumeClaim:
@@ -51,14 +51,6 @@ metadata:
 spec:
   type: LoadBalancer
   ports:
-    - name: ghidra-0
-      port: 13100
-      targetPort: 13100
-    - name: ghidra-1
-      port: 13101
-      targetPort: 13101
-    - name: ghidra-2
-      port: 13102
-      targetPort: 13102
+    {{- toYaml .Values.service.ports | nindent 4 }}
   selector:
     app: ghidra

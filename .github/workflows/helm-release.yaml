@@ -3,7 +3,7 @@ name: Release Helm Charts on New Tag
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 
 env:
   PACKAGE_DIR: dist

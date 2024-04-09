@@ -40,7 +40,7 @@ jobs:
       - name: Update Helm repository index.yaml file
         env:
           PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
-          CHART_BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/v${GITHUB_REF_NAME}
+          CHART_BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}
         run: |
           if [ -f ${PACKAGE_DIR}/index.yaml ]; then
             helm repo index $PACKAGE_DIR --merge ${PACKAGE_DIR}/index.yaml --url $CHART_BASE_URL
@@ -52,7 +52,7 @@ jobs:
         env:
           PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
           GH_TOKEN: ${{ github.token }}
-        run: gh release create v${GITHUB_REF_NAME} -R ${{ github.repository }} -t "Release v${GITHUB_REF_NAME}" -n "Release v${GITHUB_REF_NAME}" $PACKAGE_DIR/*.tgz
+        run: gh release create ${GITHUB_REF_NAME} -R ${{ github.repository }} -t "Release ${GITHUB_REF_NAME}" -n "Release ${GITHUB_REF_NAME}" $PACKAGE_DIR/*.tgz
 
       - name: Setup Github pages
         uses: actions/configure-pages@v4
@@ -75,4 +75,4 @@ jobs:
         if: ${{ failure() }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release delete -R ${{ github.repository }} v${GITHUB_REF_NAME} -y --cleanup-tag
+        run: gh release delete -R ${{ github.repository }} ${GITHUB_REF_NAME} -y --cleanup-tag

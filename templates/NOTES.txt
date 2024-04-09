@@ -1,0 +1,6 @@
+Log in with the credentials `admin:changeme`
+
+If you need to add more users, run:
+
+USER="john44"
+kubectl exec -ti ghidra-0 -- /bin/bash -c "cd /ghidra/server && ./svrAdmin -add ${USER}"

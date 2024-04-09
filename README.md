@@ -22,3 +22,7 @@ helm install ghidra/ghidra -f /tmp/values.yaml
 USER="john44"
 kubectl exec -ti ghidra-0 -- /bin/bash -c "cd /ghidra/server && ./svrAdmin -add ${USER}"
 ```
+
+# Acknowledgements
+
+- [Blacktop's Ghidra Docker Container](https://github.com/blacktop/docker-ghidra)

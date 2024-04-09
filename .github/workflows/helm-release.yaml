@@ -28,6 +28,8 @@ jobs:
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
       - name: Install Helm
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         uses: azure/setup-helm@v3
 
       - name: Package Helm chart
@@ -40,7 +42,7 @@ jobs:
       - name: Update Helm repository index.yaml file
         env:
           PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
-          CHART_BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/${GITHUB_REF_NAME}
+          CHART_BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}
         run: |
           if [ -f ${PACKAGE_DIR}/index.yaml ]; then
             helm repo index $PACKAGE_DIR --merge ${PACKAGE_DIR}/index.yaml --url $CHART_BASE_URL

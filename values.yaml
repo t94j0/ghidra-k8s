@@ -16,4 +16,4 @@ resources:
 
 sampleStorage:
   size: 10Gi
-  # storageClassName: null
+  storageClassName: local-path

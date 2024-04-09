@@ -14,9 +14,9 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Release.Name }}-ghidra
+  name: ghidra
 spec:
-  serviceName: "{{ .Release.Name }}-ghidra"
+  serviceName: "ghidra"
   replicas: 1
   selector:
     matchLabels:
@@ -27,50 +27,38 @@ spec:
         app: ghidra
     spec:
       containers:
-      - name: ghidra
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        args:
-          - "server"
-        resources:
-          {{- toYaml .Values.resources | nindent 10 }}
-        env:
-        - name: MAXMEM
-          value: "4G"
-        volumeMounts:
-        - name: samples
-          mountPath: /samples
+        - name: ghidra
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - "server"
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: MAXMEM
+              value: "4G"
+          volumeMounts:
+            - name: samples
+              mountPath: /samples
       volumes:
-      - name: samples
-        persistentVolumeClaim:
-          claimName: {{ .Release.Name }}-samples-pvc
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRouteTCP
-metadata:
-  name: ghidra-main
-spec:
-  routes:
-  - match: HostSNI(`*`)
-    services:
-    - name: {{ .Release.Name }}-ghidra-service
-      port: 13100
+        - name: samples
+          persistentVolumeClaim:
+            claimName: ghidra-samples-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-ghidra-service
+  name: ghidra-service
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
-  - name: ghidra-main
-    port: 13100
-    targetPort: 13100
-  - name: ghidra-1
-    port: 13101
-    targetPort: 13101
-  - name: ghidra-2
-    port: 13102
-    targetPort: 13102
+    - name: ghidra-0
+      port: 13100
+      targetPort: 13100
+    - name: ghidra-1
+      port: 13101
+      targetPort: 13101
+    - name: ghidra-2
+      port: 13102
+      targetPort: 13102
   selector:
     app: ghidra

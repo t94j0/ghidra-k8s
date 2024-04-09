@@ -1,0 +1,75 @@
+name: Release Helm Charts on New Tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+env:
+  PACKAGE_DIR: dist
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Package Helm chart
+        env:
+          PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
+        run: |
+          mkdir -p $PACKAGE_DIR
+          helm package --version ${GITHUB_REF_NAME} --app-version ${GITHUB_REF_NAME} -d $PACKAGE_DIR .
+
+      - name: Update Helm repository index.yaml file
+        env:
+          PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
+          CHART_BASE_URL: ${{ github.server_url }}/${{ github.repository }}/releases/download/v${GITHUB_REF_NAME}
+        run: |
+          if [ -f ${PACKAGE_DIR}/index.yaml ]; then
+            helm repo index $PACKAGE_DIR --merge ${PACKAGE_DIR}/index.yaml --url $CHART_BASE_URL
+          else
+            helm repo index $PACKAGE_DIR --url $CHART_BASE_URL
+          fi
+
+      - name: Create Github release with the Helm charts
+        env:
+          PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
+        run: gh release create v${GITHUB_REF_NAME} -R ${{ github.repository }} -t "Release v${GITHUB_REF_NAME}" -n "Release v${GITHUB_REF_NAME}" $PACKAGE_DIR/*.tgz
+
+      - name: Setup Github pages
+        uses: actions/configure-pages@v4
+
+      - name: Create Github pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.PACKAGE_DIR }}
+
+      - name: Deploy Helm chart repository to Github pages
+        uses: actions/deploy-pages@v4
+
+      - name: Remove packaged Helm charts
+        env:
+          PACKAGE_DIR: ${{ env.PACKAGE_DIR }}
+        run: rm -f ${PACKAGE_DIR}/*.tgz
+
+      - name: Remove Github release and tag on failure
+        continue-on-error: true
+        if: ${{ failure() }}
+        run: gh release delete -R ${{ github.repository }} v${GITHUB_REF_NAME} -y --cleanup-tag
